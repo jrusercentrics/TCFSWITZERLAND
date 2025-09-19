@@ -2,14 +2,23 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Cookiebot + TCF Full Debug (Vendors Config)</title>
+  <title>Cookiebot + TCF Debug (Cliente Config + IAB)</title>
   <script>
     // Ativar suporte TCF no gtag (necessário p/ Google Ads/Analytics)
     window['gtag_enable_tcf_support'] = true;
-
-    // Configuração do cliente (restrição de vendors)
   </script>
-  
+
+  <!-- Configuração do cliente -->
+  <script id="CookiebotConfiguration" type="application/json" data-cookieconsent="ignore">
+    {
+      "Frameworks": {
+        "IABTCF2": {
+          "AllowedVendors": [361, 755],
+          "AllowedGoogleACVendors": []
+        }
+      }
+    }
+  </script>
 
   <!-- Cookiebot CMP -->
   <script
@@ -17,7 +26,7 @@
     src="https://consent.cookiebot.com/uc.js"
     data-cbid="e2769309-3672-42d4-bc3f-d56333e6a880"
     data-blockingmode="auto"
-    data-framework="TCFv2.2"
+    data-framework="IAB"
     type="text/javascript"
     async>
   </script>
@@ -42,17 +51,14 @@
       }
 
       if (typeof __tcfapi !== "undefined") {
-        // getTCData
         __tcfapi('getTCData', 2, (tcData, success) => {
           log("__tcfapi getTCData (success=" + success + "):", tcData);
         });
 
-        // getVendorConsents
         __tcfapi('getVendorConsents', 2, (vendorData, success) => {
           log("__tcfapi getVendorConsents (success=" + success + "):", vendorData);
         });
 
-        // getInAppTCData
         __tcfapi('getInAppTCData', 2, (inAppData, success) => {
           log("__tcfapi getInAppTCData (success=" + success + "):", inAppData);
         });
@@ -79,7 +85,7 @@
   </script>
 </head>
 <body>
-  <h1>Cookiebot TCF Debug (Allowed Vendors: 361, 755)</h1>
+  <h1>Cookiebot TCF Debug (Allowed Vendors: 361, 755 | data-framework=IAB)</h1>
   <button onclick="checkConsent()">Check Consent Now</button>
   <pre id="output" style="background:#111;color:#0f0;padding:10px;max-height:70vh;overflow:auto;"></pre>
 </body>
