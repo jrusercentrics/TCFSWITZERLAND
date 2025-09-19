@@ -4,26 +4,6 @@
   <meta charset="UTF-8">
   <title>Cookiebot TCF Debug (CH vs DE)</title>
 
-  <!-- Pré-criar Cookiebot.regulationRegions com CH incluído -->
-  <script>
-    window.Cookiebot = window.Cookiebot || {};
-    Cookiebot.regulationRegions = {
-      gdpr: [
-        "at","be","bg","cy","cz","de","dk","es","ee","fi","fr","gb","gr","hr",
-        "hu","ie","it","lt","lu","lv","mt","nl","pl","pt","ro","sk","si","se",
-        "li","no","is","ch" // ✅ Forçado CH no array
-      ],
-      ccpa: ["us-06"],
-      lgpd: ["br"]
-    };
-    console.log("✅ Pré-criação de Cookiebot.regulationRegions com CH incluído");
-  </script>
-
-  <!-- Config inicial -->
-  <script>
-    window['gtag_enable_tcf_support'] = true;
-  </script>
-
   <!-- Cookiebot CMP -->
   <script
     id="Cookiebot"
@@ -33,6 +13,22 @@
     data-framework="TCFv2.2"
     type="text/javascript"
     async>
+  </script>
+
+  <!-- Workaround para CH -->
+  <script>
+  window.addEventListener("CookiebotOnConsentReady", function() {
+    if (window.Cookiebot && Cookiebot.userCountry?.toLowerCase() === "ch") {
+      console.log("⚡ Forçando GDPR override para Suíça");
+      Cookiebot.regulations.gdprApplies = true;
+
+      // Reforçar regeneração de TC string
+      if (typeof Cookiebot.renew === "function") {
+        console.log("⚡ Chamando Cookiebot.renew() para regenerar TC string");
+        Cookiebot.renew();
+      }
+    }
+  });
   </script>
 
   <script>
@@ -45,6 +41,7 @@
     function checkConsent() {
       log("=== CHECK CONSENT ===");
 
+      // Estado Cookiebot
       if (window.Cookiebot) {
         log("Cookiebot.userCountry:", Cookiebot.userCountry);
         log("Cookiebot.regulationRegions:", Cookiebot.regulationRegions);
@@ -57,6 +54,7 @@
         log("Cookiebot not ready yet.");
       }
 
+      // Estado TCF API
       if (typeof __tcfapi !== "undefined") {
         __tcfapi('getTCData', 2, (tcData, success) => {
           log("__tcfapi getTCData (success=" + success + "):", tcData);
