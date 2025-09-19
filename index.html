@@ -4,23 +4,28 @@
   <meta charset="UTF-8">
   <title>Cookiebot TCF Debug (CH vs DE)</title>
 
+  <!-- Workaround: injetar CH no array GDPR antes do uc.js -->
+  <script>
+    window.addEventListener("CookiebotOnLoad", function() {
+      console.log("CookiebotOnLoad: ", Cookiebot);
+    });
+
+    // Criar o objeto regulationRegions ANTES do uc.js
+    window.Cookiebot = window.Cookiebot || {};
+    Cookiebot.regulationRegions = {
+      gdpr: ["at","be","bg","cy","cz","de","dk","es","ee","fi","fr","gb","gr","hr",
+             "hu","ie","it","lt","lu","lv","mt","nl","pl","pt","ro","sk","si","se",
+             "li","no","is","ch"], // ✅ adicionado CH
+      ccpa: ["us-06"],
+      lgpd: ["br"]
+    };
+  </script>
+
   <!-- Config inicial -->
   <script>
     window['gtag_enable_tcf_support'] = true;
   </script>
-<script>
-  // Este script TEM de correr antes do uc.js ou logo a seguir
-  window.addEventListener("CookiebotOnConsentReady", function() {
-    if (Cookiebot.regulationRegions?.gdpr) {
-      if (!Cookiebot.regulationRegions.gdpr.includes("ch")) {
-        Cookiebot.regulationRegions.gdpr.push("ch");
-        console.log("✅ Workaround aplicado: CH adicionado ao array gdpr");
-      }
-    }
-    // recalcular manualmente
-    Cookiebot.regulations.gdprApplies = true;
-  });
-</script>
+
   <!-- Cookiebot CMP -->
   <script
     id="Cookiebot"
@@ -31,9 +36,6 @@
     type="text/javascript"
     async>
   </script>
-
-  <!-- Workaround: forçar CH a estar no array gdpr -->
-  
 
   <script>
     function log(message, data) {
