@@ -2,12 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Cookiebot + TCF Debug (gdprAppliesOverride)</title>
+  <title>Cookiebot TCF Debug (CH vs DE)</title>
 
-  <!-- ⚡ Workaround: define antes do Cookiebot -->
+  <!-- Config inicial -->
   <script>
     window['gtag_enable_tcf_support'] = true;
-    window.gdprAppliesOverride = true; // <--- ESTE É O WORKAROUND
+    // Tentativa de workaround (se for respeitado):
+    window.gdprAppliesOverride = true;
   </script>
 
   <!-- Cookiebot CMP -->
@@ -31,23 +32,43 @@
     function checkConsent() {
       log("=== CHECK CONSENT ===");
 
-      if (window.Cookiebot && Cookiebot.consent) {
+      // Estado Cookiebot
+      if (window.Cookiebot) {
+        log("Cookiebot.regulations:", Cookiebot.regulations);
         log("Cookiebot.consent:", Cookiebot.consent);
         log("Cookiebot.consent.tcString:", Cookiebot.consent.tcString);
         log("Cookiebot.IABConsentString:", Cookiebot.IABConsentString);
+        log("Cookiebot.consent.publisherCC:", Cookiebot.consent?.publisherCC);
+      } else {
+        log("Cookiebot not ready yet.");
       }
 
+      // Estado TCF API
       if (typeof __tcfapi !== "undefined") {
         __tcfapi('getTCData', 2, (tcData, success) => {
           log("__tcfapi getTCData (success=" + success + "):", tcData);
+          log("TCData.publisherCC:", tcData?.publisherCC);
         });
+
+        __tcfapi('getVendorConsents', 2, (vendorData, success) => {
+          log("__tcfapi getVendorConsents (success=" + success + "):", vendorData);
+        });
+
+        __tcfapi('getInAppTCData', 2, (inAppData, success) => {
+          log("__tcfapi getInAppTCData (success=" + success + "):", inAppData);
+        });
+      } else {
+        log("__tcfapi not available");
       }
     }
 
     function registerListener() {
       if (typeof __tcfapi !== "undefined") {
         __tcfapi('addEventListener', 2, (tcData, success) => {
-          if (success) log("=== TCF Event Listener triggered ===", tcData);
+          if (success) {
+            log("=== TCF Event Listener triggered ===", tcData);
+            log("publisherCC (listener):", tcData?.publisherCC);
+          }
         });
       }
     }
@@ -58,7 +79,7 @@
   </script>
 </head>
 <body>
-  <h1>Cookiebot TCF Debug (Workaround: gdprAppliesOverride=true)</h1>
+  <h1>Cookiebot TCF Debug (Comparar DE vs CH)</h1>
   <button onclick="checkConsent()">Check Consent Now</button>
   <pre id="output" style="background:#111;color:#0f0;padding:10px;max-height:70vh;overflow:auto;"></pre>
 </body>
