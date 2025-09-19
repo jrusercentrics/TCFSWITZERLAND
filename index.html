@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Cookiebot + TCF Full Debug (Vendors Config)</title>
+  <script>
+    // Ativar suporte TCF no gtag (necessário p/ Google Ads/Analytics)
+    window['gtag_enable_tcf_support'] = true;
+
+    // Configuração do cliente (restrição de vendors)
+  </script>
+  <script id="CookiebotConfiguration" type="application/json" data-cookieconsent="ignore">
+    {
+      "Frameworks": {
+        "IABTCF2": {
+          "AllowedVendors": [361, 755],
+          "AllowedGoogleACVendors": []
+        }
+      }
+    }
+  </script>
+
+  <!-- Cookiebot CMP -->
+  <script
+    id="Cookiebot"
+    src="https://consent.cookiebot.com/uc.js"
+    data-cbid="e2769309-3672-42d4-bc3f-d56333e6a880"
+    data-blockingmode="auto"
+    data-framework="TCFv2.2"
+    type="text/javascript"
+    async>
+  </script>
+  <!-- End Cookiebot CMP -->
+
+  <script>
+    function log(message, data) {
+      console.log(message, data || '');
+      const out = document.getElementById("output");
+      out.textContent += message + (data ? " " + JSON.stringify(data, null, 2) : "") + "\n\n";
+    }
+
+    function checkConsent() {
+      log("=== CHECK CONSENT ===");
+
+      // Cookiebot.consent
+      if (window.Cookiebot && Cookiebot.consent) {
+        log("Cookiebot.consent:", Cookiebot.consent);
+        log("Cookiebot.consent.tcString:", Cookiebot.consent.tcString);
+      } else {
+        log("Cookiebot not ready yet.");
+      }
+
+      if (typeof __tcfapi !== "undefined") {
+        // getTCData
+        __tcfapi('getTCData', 2, (tcData, success) => {
+          log("__tcfapi getTCData (success=" + success + "):", tcData);
+        });
+
+        // getVendorConsents
+        __tcfapi('getVendorConsents', 2, (vendorData, success) => {
+          log("__tcfapi getVendorConsents (success=" + success + "):", vendorData);
+        });
+
+        // getInAppTCData
+        __tcfapi('getInAppTCData', 2, (inAppData, success) => {
+          log("__tcfapi getInAppTCData (success=" + success + "):", inAppData);
+        });
+      } else {
+        log("__tcfapi not available");
+      }
+    }
+
+    function registerListener() {
+      if (typeof __tcfapi !== "undefined") {
+        __tcfapi('addEventListener', 2, (tcData, success) => {
+          if (success) {
+            log("=== TCF Event Listener triggered ===", tcData);
+          }
+        });
+      } else {
+        log("Cannot register listener, __tcfapi undefined");
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      setTimeout(registerListener, 2000);
+    });
+  </script>
+</head>
+<body>
+  <h1>Cookiebot TCF Debug (Allowed Vendors: 361, 755)</h1>
+  <button onclick="checkConsent()">Check Consent Now</button>
+  <pre id="output" style="background:#111;color:#0f0;padding:10px;max-height:70vh;overflow:auto;"></pre>
+</body>
+</html>
