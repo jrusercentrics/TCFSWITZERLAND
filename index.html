@@ -16,20 +16,7 @@
   </script>
 
   <!-- Workaround para CH -->
-  <script>
-  window.addEventListener("CookiebotOnConsentReady", function() {
-    if (window.Cookiebot && Cookiebot.userCountry?.toLowerCase() === "ch") {
-      console.log("⚡ Forçando GDPR override para Suíça");
-      Cookiebot.regulations.gdprApplies = true;
 
-      // Reforçar regeneração de TC string
-      if (typeof Cookiebot.renew === "function") {
-        console.log("⚡ Chamando Cookiebot.renew() para regenerar TC string");
-        Cookiebot.renew();
-      }
-    }
-  });
-  </script>
 
   <script>
     function log(message, data) {
