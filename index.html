@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Cookiebot + TCF Debug (Workaround gdprApplies=true)</title>
+  <title>Cookiebot + TCF Debug (Workaround CH)</title>
   <script>
     // Ativar suporte TCF no gtag (necessário p/ Google Ads/Analytics)
     window['gtag_enable_tcf_support'] = true;
@@ -21,21 +21,15 @@
   <!-- End Cookiebot CMP -->
 
   <script>
-    // Workaround: forçar gdprApplies=true em todas as chamadas à __tcfapi
-    window.addEventListener("CookiebotOnConsentReady", function() {
-      if (typeof __tcfapi !== "undefined") {
-        const originalTcfApi = __tcfapi;
-        window.__tcfapi = function(command, version, callback, parameter) {
-          originalTcfApi(command, version, function(tcData, success) {
-            if (success && tcData && tcData.gdprApplies === false) {
-              tcData.gdprApplies = true; // 🚧 Força workaround
-            }
-            callback(tcData, success);
-          }, parameter);
-        };
-        console.log("⚠️ Workaround ativo: forçando gdprApplies=true");
+    // Workaround: adicionar manualmente "ch" à lista GDPR
+    setTimeout(() => {
+      if (typeof Cookiebot !== "undefined" && Cookiebot.regulationRegions?.gdpr) {
+        if (!Cookiebot.regulationRegions.gdpr.includes("ch")) {
+          Cookiebot.regulationRegions.gdpr.push("ch");
+          console.log("⚠️ Workaround aplicado: 'ch' adicionado a regulationRegions.gdpr");
+        }
       }
-    });
+    }, 100);
 
     // Função de logging
     function log(message, data) {
@@ -44,13 +38,13 @@
       out.textContent += message + (data ? " " + JSON.stringify(data, null, 2) : "") + "\n\n";
     }
 
-    // Checar estado atual
     function checkConsent() {
       log("=== CHECK CONSENT ===");
 
       if (window.Cookiebot && Cookiebot.consent) {
         log("Cookiebot.consent:", Cookiebot.consent);
         log("Cookiebot.consent.tcString:", Cookiebot.consent.tcString);
+        log("Cookiebot.IABConsentString:", Cookiebot.IABConsentString);
       } else {
         log("Cookiebot not ready yet.");
       }
@@ -72,7 +66,6 @@
       }
     }
 
-    // Listener para eventos TCF
     function registerListener() {
       if (typeof __tcfapi !== "undefined") {
         __tcfapi('addEventListener', 2, (tcData, success) => {
@@ -91,7 +84,7 @@
   </script>
 </head>
 <body>
-  <h1>Cookiebot TCF Debug (Workaround gdprApplies=true)</h1>
+  <h1>Cookiebot TCF Debug (Workaround CH)</h1>
   <button onclick="checkConsent()">Check Consent Now</button>
   <pre id="output" style="background:#111;color:#0f0;padding:10px;max-height:70vh;overflow:auto;"></pre>
 </body>
