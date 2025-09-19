@@ -21,6 +21,28 @@
     type="text/javascript"
     async>
   </script>
+  <script>
+(function() {
+  var oldTcfapi = window.__tcfapi;
+  window.__tcfapi = function(command, version, callback, parameter) {
+    if (oldTcfapi) {
+      oldTcfapi(command, version, function(tcData, success) {
+        if (success && tcData) {
+          // ⚡ Workaround: forçar GDPR aplica-se na Suíça
+          if (tcData.gdprApplies === false) {
+            tcData.gdprApplies = true;
+            tcData.publisherCC = "CH";
+          }
+        }
+        callback(tcData, success);
+      }, parameter);
+    } else {
+      console.warn("__tcfapi not ready");
+    }
+  };
+})();
+</script>
+
 
   <script>
     function log(message, data) {
