@@ -7,8 +7,6 @@
   <!-- Config inicial -->
   <script>
     window['gtag_enable_tcf_support'] = true;
-    // Tentativa de workaround (se for respeitado):
-    window.gdprAppliesOverride = true;
   </script>
 
   <!-- Cookiebot CMP -->
@@ -21,28 +19,22 @@
     type="text/javascript"
     async>
   </script>
-  <script>
-(function() {
-  var oldTcfapi = window.__tcfapi;
-  window.__tcfapi = function(command, version, callback, parameter) {
-    if (oldTcfapi) {
-      oldTcfapi(command, version, function(tcData, success) {
-        if (success && tcData) {
-          // ⚡ Workaround: forçar GDPR aplica-se na Suíça
-          if (tcData.gdprApplies === false) {
-            tcData.gdprApplies = true;
-            tcData.publisherCC = "CH";
-          }
-        }
-        callback(tcData, success);
-      }, parameter);
-    } else {
-      console.warn("__tcfapi not ready");
-    }
-  };
-})();
-</script>
 
+  <!-- Workaround: forçar CH a estar no array gdpr -->
+  <script>
+    setTimeout(() => {
+      if (window.Cookiebot && Cookiebot.regulationRegions?.gdpr) {
+        if (!Cookiebot.regulationRegions.gdpr.includes("ch")) {
+          Cookiebot.regulationRegions.gdpr.push("ch");
+          console.log("✅ Workaround aplicado: adicionada CH ao array gdpr");
+        } else {
+          console.log("ℹ️ CH já estava no array gdpr");
+        }
+      } else {
+        console.warn("⚠️ Cookiebot ainda não carregado, não foi possível aplicar workaround");
+      }
+    }, 200);
+  </script>
 
   <script>
     function log(message, data) {
@@ -54,8 +46,9 @@
     function checkConsent() {
       log("=== CHECK CONSENT ===");
 
-      // Estado Cookiebot
       if (window.Cookiebot) {
+        log("Cookiebot.userCountry:", Cookiebot.userCountry);
+        log("Cookiebot.regulationRegions:", Cookiebot.regulationRegions);
         log("Cookiebot.regulations:", Cookiebot.regulations);
         log("Cookiebot.consent:", Cookiebot.consent);
         log("Cookiebot.consent.tcString:", Cookiebot.consent.tcString);
@@ -65,7 +58,6 @@
         log("Cookiebot not ready yet.");
       }
 
-      // Estado TCF API
       if (typeof __tcfapi !== "undefined") {
         __tcfapi('getTCData', 2, (tcData, success) => {
           log("__tcfapi getTCData (success=" + success + "):", tcData);
