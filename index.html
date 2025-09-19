@@ -8,7 +8,19 @@
   <script>
     window['gtag_enable_tcf_support'] = true;
   </script>
-
+<script>
+  // Este script TEM de correr antes do uc.js ou logo a seguir
+  window.addEventListener("CookiebotOnConsentReady", function() {
+    if (Cookiebot.regulationRegions?.gdpr) {
+      if (!Cookiebot.regulationRegions.gdpr.includes("ch")) {
+        Cookiebot.regulationRegions.gdpr.push("ch");
+        console.log("✅ Workaround aplicado: CH adicionado ao array gdpr");
+      }
+    }
+    // recalcular manualmente
+    Cookiebot.regulations.gdprApplies = true;
+  });
+</script>
   <!-- Cookiebot CMP -->
   <script
     id="Cookiebot"
@@ -21,20 +33,7 @@
   </script>
 
   <!-- Workaround: forçar CH a estar no array gdpr -->
-  <script>
-    setTimeout(() => {
-      if (window.Cookiebot && Cookiebot.regulationRegions?.gdpr) {
-        if (!Cookiebot.regulationRegions.gdpr.includes("ch")) {
-          Cookiebot.regulationRegions.gdpr.push("ch");
-          console.log("✅ Workaround aplicado: adicionada CH ao array gdpr");
-        } else {
-          console.log("ℹ️ CH já estava no array gdpr");
-        }
-      } else {
-        console.warn("⚠️ Cookiebot ainda não carregado, não foi possível aplicar workaround");
-      }
-    }, 200);
-  </script>
+  
 
   <script>
     function log(message, data) {
